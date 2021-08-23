@@ -1,7 +1,10 @@
 const User = require("../models/user");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
-
+const bcrypt = require('bcrypt');
+const Admin = require('../models/admin');
+const mongoose =  require('mongoose');
+const admin = require("../models/admin");
 module.exports.get_detail = async (req, res) => {
   try {
     const member = await User.find({});
@@ -57,6 +60,79 @@ module.exports.form_post = async (req, res) => {
     res.status(400).json({ message: "User exists" });
   }
 };
+
+module.exports.user_signup= (req, res, next) => {
+  Admin.find({email:req.body.email}).exec().then(admin =>{
+      if(admin.length >= 1){
+          return res.status(409).json({
+              message:'Mail exists'
+          })
+
+      }
+      else{
+        bcrypt.hash(req.body.password, 10, (err, hash) => {
+            if (err) {
+                return res.status(500).json({
+                    error: err
+                });
+            } else {
+                const admin = new Admin({
+                    _id: new mongoose.Types.ObjectId(),
+                    email: req.body.email,
+                    password: hash,
+                });
+                admin.save()
+                .then(result =>{
+                    console.log(result)
+                    return res.status(200).json({
+                      message:"User created",
+                  });
+                    })
+                .catch(err =>{
+                    console.log(err)
+                    return res.status(500).json({
+                        error: err
+                    });
+        });
+            }
+    });
+      }
+  })
+
+}
+module.exports.user_login =(req,res,next)=>{
+  Admin.find({email:req.body.email}).exec()
+  .then(admin => {
+      if(admin.length <1){
+          return res.status(401).json({
+              message:'Auth failed'
+          });  
+      }
+      bcrypt.compare(req.body.password,admin[0].password,(error,result)=>{
+          if(error){
+              return res.status(401).json({
+                  message:'Auth failed'
+              });  
+          }
+          if(result){
+              return res.status(200).json({
+                  message:'Auth successful',
+              });
+          }
+          res.status(401).json({
+              message:'Auth failed'
+          });  
+      })
+  })
+  .catch(err =>{
+      console.log(err)
+       res.status(500).json({
+          error: err
+      });
+  })
+}
+
+
 
 module.exports.email_post = async (req, res) => {
   const { email, uuid } = req.body;
@@ -203,4 +279,4 @@ module.exports.email_post = async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: "User Not found" });
   }
-};
+}
