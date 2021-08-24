@@ -12,18 +12,19 @@ module.exports.get_detail = async (req, res) => {
 };
 module.exports.get_detailbyId = async (req, res) => {
   try {
-    const member = await User.findbyId(req.params.id);
+    const member = await User.find({ _id: req.params.id });
     res.status(201).json({ user: member });
   } catch (err) {
     res.status(400).json({ message: "User doesn't exists" });
   }
 };
 module.exports.upd_put = async (req, res) => {
-  const { applicant, id } = req.body;
+  const { Applicants } = req.body;
+  const id = req.params.id;
   try {
     const query = { _id: id };
     const updateDocument = {
-      domain: applicant.domain,
+      domain: Applicants.domain,
     };
     const data = await User.updateOne(query, updateDocument);
     const result = await User.findById(id);
@@ -55,7 +56,7 @@ module.exports.form_post = async (req, res) => {
     });
     res.status(201).json({ message: "Successfully registered", user: member });
   } catch (err) {
-    res.status(400).json({ message: "User exists" });
+    res.status(400).json(err.message);
   }
 };
 
