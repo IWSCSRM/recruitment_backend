@@ -2,11 +2,6 @@ const mongoose = require("mongoose");
 // const { isEmail } = require("validator");
 
 const userSchema = new mongoose.Schema({
-  id: {
-    type: Number,
-    required: [true, "Please enter an id"],
-    unique: true,
-  },
   name: {
     type: String,
     required: [true, "Please enter a name"],

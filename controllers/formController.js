@@ -10,20 +10,23 @@ module.exports.get_detail = async (req, res) => {
     res.status(400).json({ message: "User exists" });
   }
 };
+module.exports.get_detailbyId = async (req, res) => {
+  try {
+    const member = await User.findbyId(req.params.id);
+    res.status(201).json({ user: member });
+  } catch (err) {
+    res.status(400).json({ message: "User doesn't exists" });
+  }
+};
 module.exports.upd_put = async (req, res) => {
-  // const { emailId, name, isShortlisted } = req.body;
   const { applicant, id } = req.body;
   try {
-    // const query = { emailId: emailId, "domain.name": name };
-    // const updateDocument = {
-    //   $set: { "domain.$.isShortlisted": isShortlisted },
-    // };
-    const query = { id: id };
+    const query = { _id: id };
     const updateDocument = {
       domain: applicant.domain,
     };
     const data = await User.updateOne(query, updateDocument);
-    const result = await User.find({ id });
+    const result = await User.findById(id);
     res.status(200).json({ result });
   } catch (e) {
     res.status(400).json({ message: "Error while updating" });
@@ -32,7 +35,6 @@ module.exports.upd_put = async (req, res) => {
 
 module.exports.form_post = async (req, res) => {
   const {
-    id,
     name,
     branch,
     registrationNo,
@@ -43,7 +45,6 @@ module.exports.form_post = async (req, res) => {
   } = req.body;
   try {
     const member = await User.create({
-      id,
       name,
       branch,
       registrationNo,
