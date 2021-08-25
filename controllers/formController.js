@@ -2,6 +2,9 @@ const User = require("../models/user");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 const {adminSchema} = require('../validator/adminValidator');
+const jwt = require('jsonwebtoken')
+
+
 module.exports.get_detail = async (req, res) => {
   try {
     const member = await User.find({});
@@ -62,7 +65,17 @@ module.exports.login = async (req, res, next) => {
     const { password } = req.body
     await adminSchema.validateAsync({'password':password})
     if(password === process.env.PASSWORD){
-      res.status(200).json({'message':'Admin logeed in'})
+      const token= jwt.sign({
+        'password':password
+    },
+    "secret",
+    {
+        expiresIn: "1d"
+    })
+      res.status(200).json({
+        'message':'Admin logeed in',
+         'token': token
+      })
     }
     else{
       res.status(401).json({'message':'Invalid password'})
