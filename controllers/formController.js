@@ -1,6 +1,9 @@
 const User = require("../models/user");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
+const {adminSchema} = require('../validator/adminValidator');
+const jwt = require('jsonwebtoken')
+
 
 module.exports.get_detail = async (req, res) => {
   try {
@@ -57,7 +60,31 @@ module.exports.form_post = async (req, res) => {
     res.status(400).json({ message: "User exists" });
   }
 };
-
+module.exports.login = async (req, res, next) => {
+  try {
+    const { password } = req.body
+    await adminSchema.validateAsync({'password':password})
+    if(password === process.env.PASSWORD){
+      const token= jwt.sign({
+        'password':password
+    },
+    "secret",
+    {
+        expiresIn: "1d"
+    })
+      res.status(200).json({
+        'message':'Admin logeed in',
+         'token': token
+      })
+    }
+    else{
+      res.status(401).json({'message':'Invalid password'})
+    }
+  } catch (error) {
+    if (error.isJoi === true) error.status = 422
+    next(error)
+  }
+},
 module.exports.email_post = async (req, res) => {
   const { email, uuid } = req.body;
   try {
@@ -203,4 +230,4 @@ module.exports.email_post = async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: "User Not found" });
   }
-};
+}

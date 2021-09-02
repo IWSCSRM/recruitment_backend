@@ -5,7 +5,7 @@ require("dotenv").config();
 mongoose
   .connect(
     process.env.MONGO_URL,
-    // "mongodb+srv://hackDB:Jayesh@135@cluster0.lev68.mongodb.net/creamzoDB"
+    // "mongodb+srv://hackDB:Jayesh@135@cluster0.lev68.mongodb.net/creamzoDB",
     {
       useUnifiedTopology: true,
       useNewUrlParser: true,
