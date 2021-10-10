@@ -85,30 +85,31 @@ module.exports.email_post = async (req, res) => {
   const uuid = Math.floor(1000 + Math.random() * 9000);
   try {
     const user = await User.findOne({ emailId: email });
-    async function main() {
-      let testAccount = await nodemailer.createTestAccount();
+    if (user) {
+      async function main() {
+        let testAccount = await nodemailer.createTestAccount();
 
-      // create reusable transporter object using the default SMTP transport
-      let transporter = nodemailer.createTransport({
-        // SES: new aws.SES({
-        //   apiVersion: "2010-12-01",
-        // }),
-        // sendingRate: 1,
-        pool: true,
-        service: "gmail",
-        // true for 465, false for other ports
-        auth: {
-          user: process.env.EMAIL,
-          pass: process.env.PASSWORD,
-        },
-      });
+        // create reusable transporter object using the default SMTP transport
+        let transporter = nodemailer.createTransport({
+          // SES: new aws.SES({
+          //   apiVersion: "2010-12-01",
+          // }),
+          // sendingRate: 1,
+          pool: true,
+          service: "gmail",
+          // true for 465, false for other ports
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD,
+          },
+        });
 
-      let info = await transporter.sendMail({
-        from: process.env.EMAIL, // sender address
-        to: email, // list of receivers
-        subject: "Recruitment", // Subject line
+        let info = await transporter.sendMail({
+          from: process.env.EMAIL, // sender address
+          to: user.emailId, // list of receivers
+          subject: "Recruitment", // Subject line
 
-        html: `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+          html: `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
           <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
           <head>
           <!--[if gte mso 9]>
@@ -207,23 +208,26 @@ module.exports.email_post = async (req, res) => {
           
           </html>
           `,
-        // plain text body
-        // html: "<b>Hello world?</b>", // html body
-      });
+          // plain text body
+          // html: "<b>Hello world?</b>", // html body
+        });
 
-      console.log("Message sent: %s", info.messageId);
-      // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+        console.log("Message sent: %s", info.messageId);
+        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
 
-      // Preview only available when sending through an Ethereal account
-      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-      // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-      //}
+        // Preview only available when sending through an Ethereal account
+        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+        //}
 
-      // send mail with defined transport object
+        // send mail with defined transport object
+      }
+      main().catch(console.error);
+      res.status(200).json({ messsage: "Mail sent", user: user, uuid });
+    } else {
+      throw "unable to send mail";
     }
-    main().catch(console.error);
-    res.status(200).json({ messsage: "Mail sent", user: user, uuid });
   } catch (err) {
-    res.status(400).json({ error: "User Not found" });
+    res.status(400).json({ error: "User Not found", message: err });
   }
 };
