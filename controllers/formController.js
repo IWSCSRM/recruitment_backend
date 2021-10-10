@@ -58,7 +58,7 @@ module.exports.login = async (req, res, next) => {
   try {
     const { password } = req.body;
     await adminSchema.validateAsync({ password: password });
-    if (password === process.env.PASSWORD) {
+    if (password === process.env.PASS) {
       const token = jwt.sign(
         {
           password: password,
