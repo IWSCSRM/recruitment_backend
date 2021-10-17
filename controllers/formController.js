@@ -57,7 +57,7 @@ module.exports.form_post = async (req, res) => {
 module.exports.login = async (req, res, next) => {
   try {
     const { password } = req.body;
-    await adminSchema.validateAsync({ password: password });
+    // await adminSchema.validateAsync({ password: password });
     if (password === process.env.PASS) {
       const token = jwt.sign(
         {
